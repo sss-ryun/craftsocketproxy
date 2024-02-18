@@ -7,13 +7,13 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.http.DefaultHttpHeaders
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory
 import io.netty.handler.codec.http.websocketx.WebSocketVersion
-import me.ryun.mcsockproxy.common.MinecraftConnectionConfiguration
+import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 import java.net.ConnectException
 import java.net.URI
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
-class ProxyClient(val host: String, val port: Int, val connectionConfiguration: MinecraftConnectionConfiguration, val path: String = "/") {
+class ProxyClient(val host: String, val port: Int, val connectionConfiguration: CraftConnectionConfiguration, val path: String = "/") {
     private val group = NioEventLoopGroup()
     private var restartAttempts = 0
     private var maxRestarts = 5
@@ -25,7 +25,7 @@ class ProxyClient(val host: String, val port: Int, val connectionConfiguration: 
         try {
             val handler = ClientInboundConnectionHandler(WebSocketClientHandshakerFactory.newHandshaker(wsURI, WebSocketVersion.V13, "", true, DefaultHttpHeaders()))
             val atomicChannel = AtomicReference<Channel?>(null)
-            val minecraftClientProxy = MinecraftClientProxy(connectionConfiguration, atomicChannel)
+            val craftClientProxy = CraftClientProxy(connectionConfiguration, atomicChannel)
 
             val bootstrap = Bootstrap()
             bootstrap.group(group)
@@ -34,8 +34,8 @@ class ProxyClient(val host: String, val port: Int, val connectionConfiguration: 
 
             val channel = bootstrap.connect(wsURI.host, wsURI.port).sync().channel()
             handler.getHandshakeFuture().sync()
-            minecraftClientProxy.websocketChannel = channel
-            minecraftClientProxy.start() //TODO: Handle connection timeouts
+            craftClientProxy.websocketChannel = channel
+            craftClientProxy.start() //TODO: Handle connection timeouts
 
             channel.closeFuture().addListener {
                 println("Restarting...")

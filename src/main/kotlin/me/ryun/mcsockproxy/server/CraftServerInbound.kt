@@ -8,12 +8,12 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
-import me.ryun.mcsockproxy.common.MinecraftConnectionConfiguration
-import me.ryun.mcsockproxy.common.MinecraftOutboundConnection
+import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
+import me.ryun.mcsockproxy.common.CraftOutboundConnection
 import java.net.SocketException
 import java.util.concurrent.atomic.AtomicReference
 
-class MinecraftServerInbound(private val configuration: MinecraftConnectionConfiguration): SimpleChannelInboundHandler<BinaryWebSocketFrame>() {
+class CraftServerInbound(private val configuration: CraftConnectionConfiguration): SimpleChannelInboundHandler<BinaryWebSocketFrame>() {
     private lateinit var channel: Channel
     private var isChannelFlushable = false
 
@@ -22,7 +22,7 @@ class MinecraftServerInbound(private val configuration: MinecraftConnectionConfi
         val bootstrap = Bootstrap()
         bootstrap.group(context.channel().eventLoop())
             .channel(NioSocketChannel::class.java)
-            .handler(MinecraftServerHandler(context.channel()))
+            .handler(CraftServerHandler(context.channel()))
 
         val channelFuture = bootstrap.connect(configuration.host, configuration.port)
         channel = channelFuture.channel()
@@ -51,9 +51,9 @@ class MinecraftServerInbound(private val configuration: MinecraftConnectionConfi
         if(isChannelFlushable) channel.flush()
     }
 
-    private class MinecraftServerHandler(private val channel: Channel): ChannelInitializer<SocketChannel>() {
+    private class CraftServerHandler(private val channel: Channel): ChannelInitializer<SocketChannel>() {
         override fun initChannel(channel: SocketChannel) {
-            channel.pipeline().addLast(MinecraftOutboundConnection(AtomicReference<Channel?>(this.channel)))
+            channel.pipeline().addLast(CraftOutboundConnection(AtomicReference<Channel?>(this.channel)))
         }
     }
 }

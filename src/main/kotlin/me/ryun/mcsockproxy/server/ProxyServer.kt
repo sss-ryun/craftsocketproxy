@@ -3,9 +3,9 @@ package me.ryun.mcsockproxy.server
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import me.ryun.mcsockproxy.common.MinecraftConnectionConfiguration
+import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 
-class ProxyServer(configuration: MinecraftConnectionConfiguration, path: String = "/") {
+class ProxyServer(configuration: CraftConnectionConfiguration, path: String = "/") {
     init { //TODO: Sanitize configuration
         val bossGroup = NioEventLoopGroup(1)
         val workerGroup = NioEventLoopGroup()

@@ -6,7 +6,7 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpClientCodec
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler
-import me.ryun.mcsockproxy.common.MinecraftOutboundConnection
+import me.ryun.mcsockproxy.common.CraftOutboundConnection
 import java.util.concurrent.atomic.AtomicReference
 
 class ClientInitializer(private val handler: ClientInboundConnectionHandler, private val clientChannel: AtomicReference<Channel?>): ChannelInitializer<SocketChannel>() {
@@ -17,6 +17,6 @@ class ClientInitializer(private val handler: ClientInboundConnectionHandler, pri
             WebSocketClientCompressionHandler.INSTANCE,
             handler
         )
-        channel.pipeline().addLast(MinecraftOutboundConnection(clientChannel))
+        channel.pipeline().addLast(CraftOutboundConnection(clientChannel))
     }
 }

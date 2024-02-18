@@ -9,14 +9,14 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
-import me.ryun.mcsockproxy.common.MinecraftConnectionConfiguration
-import me.ryun.mcsockproxy.common.MinecraftOutboundConnection
+import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
+import me.ryun.mcsockproxy.common.CraftOutboundConnection
 import java.util.concurrent.atomic.AtomicReference
 
 /**
  * From client
  */
-class MinecraftClientInbound(private val configuration: MinecraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, private val websocketChannel: Channel? = null): ChannelInboundHandlerAdapter() {
+class CraftClientInbound(private val configuration: CraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, private val websocketChannel: Channel? = null): ChannelInboundHandlerAdapter() {
     private lateinit var channel: Channel
     private var isChannelFlushable = false
     override fun channelActive(context: ChannelHandlerContext) {
@@ -29,7 +29,7 @@ class MinecraftClientInbound(private val configuration: MinecraftConnectionConfi
             val bootstrap = Bootstrap()
             bootstrap.group(context.channel().eventLoop())
                 .channel(NioSocketChannel::class.java)
-                .handler(MinecraftClientHandler(context.channel()))
+                .handler(CraftClientHandler(context.channel()))
             println("Connected as a Transparent Minecraft Proxy.")
             val channelFuture = bootstrap.connect(configuration.host, configuration.port)
             channel = channelFuture.channel()
@@ -58,9 +58,9 @@ class MinecraftClientInbound(private val configuration: MinecraftConnectionConfi
         context.close()
     }
 
-    private class MinecraftClientHandler(private val channel: Channel): ChannelInitializer<SocketChannel>() {
+    private class CraftClientHandler(private val channel: Channel): ChannelInitializer<SocketChannel>() {
         override fun initChannel(channel: SocketChannel) {
-            channel.pipeline().addLast(MinecraftOutboundConnection(AtomicReference<Channel?>(this.channel)))
+            channel.pipeline().addLast(CraftOutboundConnection(AtomicReference<Channel?>(this.channel)))
         }
     }
 }

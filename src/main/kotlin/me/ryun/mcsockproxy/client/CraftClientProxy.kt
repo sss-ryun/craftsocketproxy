@@ -6,10 +6,10 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import me.ryun.mcsockproxy.common.MinecraftConnectionConfiguration
+import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 import java.util.concurrent.atomic.AtomicReference
 
-class MinecraftClientProxy(private val configuration: MinecraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, var websocketChannel: Channel? = null) {
+class CraftClientProxy(private val configuration: CraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, var websocketChannel: Channel? = null) {
 
     fun start() {
         val bossGroup = NioEventLoopGroup(1)
@@ -19,7 +19,7 @@ class MinecraftClientProxy(private val configuration: MinecraftConnectionConfigu
             val serverBootstrap = ServerBootstrap()
             serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
-                .childHandler(MinecraftClientInitializer(configuration, clientChannel, websocketChannel))
+                .childHandler(CraftClientInitializer(configuration, clientChannel, websocketChannel))
 
             val channelFuture = serverBootstrap.bind(configuration.proxyPort).sync()
             websocketChannel!!.closeFuture().addListener {
@@ -32,9 +32,9 @@ class MinecraftClientProxy(private val configuration: MinecraftConnectionConfigu
         }
     }
 
-    private class MinecraftClientInitializer(private val configuration: MinecraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, private val websocketChannel: Channel? = null): ChannelInitializer<SocketChannel>() {
+    private class CraftClientInitializer(private val configuration: CraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, private val websocketChannel: Channel? = null): ChannelInitializer<SocketChannel>() {
         override fun initChannel(channel: SocketChannel) {
-            channel.pipeline().addLast(MinecraftClientInbound(configuration, clientChannel, websocketChannel))
+            channel.pipeline().addLast(CraftClientInbound(configuration, clientChannel, websocketChannel))
         }
     }
 }

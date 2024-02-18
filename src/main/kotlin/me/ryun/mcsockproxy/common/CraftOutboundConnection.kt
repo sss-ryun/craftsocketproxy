@@ -7,7 +7,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
 import java.util.concurrent.atomic.AtomicReference
 
-class MinecraftOutboundConnection(private val outboundChannel: AtomicReference<Channel?>): ChannelInboundHandlerAdapter() {
+class CraftOutboundConnection(private val outboundChannel: AtomicReference<Channel?>): ChannelInboundHandlerAdapter() {
     override fun channelRead(context: ChannelHandlerContext, message: Any) {
         var decapsulatedMessage = message
         if(message is BinaryWebSocketFrame) decapsulatedMessage = message.content()
