@@ -1,4 +1,4 @@
-# Minecraft Socket Proxy
+# Craft Socket Proxy
 Tunnel Minecraft Servers to a different port or proxy a Minecraft Server through WebSockets.
 
 ## Supports
@@ -24,6 +24,11 @@ Tunnel Minecraft Servers to a different port or proxy a Minecraft Server through
 * Works for Multiplayer Servers.
 * Vanilla players won't even know others are in WebSocket proxy unless they are told.
 * Data is never processed. This software just shoves it along, making it very efficient, performant, and memory-saving.
+
+# DISCLAIMER
+```
+THIS PROJECT IS NOT AFFILIATED WITH MOJANG SYNERGIES AB OR MICROSOFT CORPORATION IN ANY WAY OR FORM.
+```
 
 # LICENSE
 ```text
