@@ -25,6 +25,58 @@ Tunnel Minecraft Servers to a different port or proxy a Minecraft Server through
 * Vanilla players won't even know others are in WebSocket proxy unless they are told.
 * Data is never processed. This software just shoves it along, making it very efficient, performant, and memory-saving.
 
+## Get Started
+
+Start off by downloading a build from [Releases](https://github.com/sss-ryun/craftsocketproxy/releases/).
+
+### Prerequisites (Requirements)
+* At least Java 8+
+* Terminal
+
+### Run the jar with the following commands
+
+**Proxy Client (no WebSockets)** `localhost:25565 -> localhost:25566`
+```bash
+java -jar CraftSocketProxy-1.0.0.jar --c -host localhost -port 25565 -proxy 25566
+```
+> [!NOTE]
+> This one is useful if you can't change the port forwarding settings in your router, and you can't change the server port.
+> Simply proxy it to a different port.
+
+**Proxy Client (with WebSockets)** `ws://example.com:80 -> localhost:25565`
+```bash
+java -jar CraftSocketProxy-1.0.0.jar --c -host example.com -port 80 -proxy 25565
+```
+
+> [!CAUTION]
+> If the supplied port for the client is 80 or 443, then it will automatically attempt to connect to the host through a WebSocket connection.
+
+**Proxy Server (WebSockets)** `localhost:25565 -> ws://localhost:80`
+```bash
+java -jar CraftSocketProxy-1.0.0.jar --s -host localhost -port 25565 -proxy 80
+```
+
+> [!IMPORTANT]
+> If you already have a server using the port 80 and 443, use a different port and reverse proxy it to a different path.
+> **Example:** `ws://example.com:80/minecraft`
+
+## Full list of commands:
+```text
+Arguments:
+--c               | Start a Client Proxy
+--s               | Start a Server Proxy
+-host  <Hostname> | Hostname
+-port  <Port>     | Port of Host
+-proxy <Port>     | Output port of Proxy
+-path  <Path>     | (Optional) Path of WebSocket connection
+--version         | Query version
+```
+
+### Examples
+
+I have made three [examples](https://github.com/sss-ryun/craftsocketproxy/tree/master/examples/src/main/kotlin/) if you
+want to use this as a dependency and create your own plugin or mod or whatever.
+
 # DISCLAIMER
 ```
 THIS PROJECT IS NOT AFFILIATED WITH MOJANG SYNERGIES AB OR MICROSOFT CORPORATION IN ANY WAY OR FORM.

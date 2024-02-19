@@ -8,9 +8,11 @@ import io.netty.handler.codec.http.FullHttpResponse
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException
+import me.ryun.mcsockproxy.common.CraftSocketConstants
 import java.net.SocketException
 
-class ClientInboundConnectionHandler(val handshaker: WebSocketClientHandshaker): SimpleChannelInboundHandler<Any>() {
+internal class ClientInboundConnectionHandler(
+    private val handshaker: WebSocketClientHandshaker): SimpleChannelInboundHandler<Any>() {
     private lateinit var handshakeFuture: ChannelPromise
 
     override fun channelRead0(context: ChannelHandlerContext, any: Any) {
@@ -21,11 +23,11 @@ class ClientInboundConnectionHandler(val handshaker: WebSocketClientHandshaker):
 
                 handshakeFuture.setSuccess()
 
-                println("WebSocket handshake complete.")
+                println(CraftSocketConstants.HANDSHAKE_COMPLETE)
             } catch (exception: WebSocketHandshakeException) {
                 handshakeFuture.setFailure(exception)
 
-                println("WebSocket failed to connect.")
+                println(CraftSocketConstants.HANDSHAKE_FAILED)
             }
 
             return
@@ -33,7 +35,7 @@ class ClientInboundConnectionHandler(val handshaker: WebSocketClientHandshaker):
 
         when(any) {
             is FullHttpResponse -> {
-                println("Illegal response!")
+                println(CraftSocketConstants.UNSUPPORTED_HTTP_RESPONSE)
                 context.close()
             }
             is BinaryWebSocketFrame -> context.fireChannelRead(any.retain())
@@ -42,7 +44,7 @@ class ClientInboundConnectionHandler(val handshaker: WebSocketClientHandshaker):
     @Deprecated("Deprecated in Java")
     override fun exceptionCaught(context: ChannelHandlerContext, cause: Throwable) {
         if(cause is SocketException && cause.message!!.contains("Connection reset")) {
-            println("Connection terminated.")
+            println(CraftSocketConstants.CONNECTION_TERMINATED)
         }
     }
 
@@ -61,6 +63,6 @@ class ClientInboundConnectionHandler(val handshaker: WebSocketClientHandshaker):
     override fun channelInactive(context: ChannelHandlerContext) {
         context.disconnect()
         context.fireChannelInactive()
-        println("WebSocket disconnected.")
+        println(CraftSocketConstants.DISCONNECTED_WEBSOCKET)
     }
 }

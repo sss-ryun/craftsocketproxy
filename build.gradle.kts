@@ -1,13 +1,16 @@
+import org.jetbrains.kotlin.gradle.dsl.jvm.JvmTargetValidationMode
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 plugins {
     kotlin("jvm") version "1.9.22"
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(8)
 }
 
 group = "me.ryun.mcsockproxy"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -15,8 +18,8 @@ repositories {
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-
     implementation("io.netty:netty-all:4.1.107.Final")
+    implementation(project(":main"))
 }
 
 tasks.test {
@@ -30,6 +33,10 @@ tasks.getByName<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes["Main-Class"] = "me.ryun.mcsockproxy.Main2Kt"
+        attributes["Main-Class"] = "me.ryun.mcsockproxy.MainKt"
     }
+}
+
+tasks.withType<KotlinJvmCompile>().configureEach {
+    jvmTargetValidationMode.set(JvmTargetValidationMode.WARNING)
 }

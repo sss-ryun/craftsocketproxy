@@ -8,17 +8,22 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.handler.logging.LogLevel
+import io.netty.handler.logging.LoggingHandler
 import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 import me.ryun.mcsockproxy.common.CraftOutboundConnection
+import me.ryun.mcsockproxy.common.CraftSocketConstants
 import java.net.SocketException
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
-class CraftServerInbound(private val configuration: CraftConnectionConfiguration): SimpleChannelInboundHandler<BinaryWebSocketFrame>() {
+internal class CraftServerInbound(
+    private val configuration: CraftConnectionConfiguration): SimpleChannelInboundHandler<BinaryWebSocketFrame>() {
     private lateinit var channel: Channel
     private var isChannelFlushable = false
 
     override fun channelActive(context: ChannelHandlerContext) {
-        println("Player connected.")
+        println(CraftSocketConstants.PLAYER_CONNECTED)
         val bootstrap = Bootstrap()
         bootstrap.group(context.channel().eventLoop())
             .channel(NioSocketChannel::class.java)
@@ -28,7 +33,11 @@ class CraftServerInbound(private val configuration: CraftConnectionConfiguration
         channel = channelFuture.channel()
         channelFuture.addListener {future ->
             if(future.isSuccess) channelFuture.channel().flush()
-            //else context.disconnect() <- Fix restart loop.
+            else { //Restart Minecraft Server connection after 100ms.
+                println(CraftSocketConstants.CONNECTION_REFUSED)
+                context.channel().eventLoop().schedule({context.disconnect()}, 10, TimeUnit.SECONDS)
+            }
+
             isChannelFlushable = future.isSuccess
         }
     }
@@ -36,13 +45,13 @@ class CraftServerInbound(private val configuration: CraftConnectionConfiguration
     override fun channelInactive(context: ChannelHandlerContext) {
         channel.close()
         context.disconnect()
-        println("Player disconnected.")
+        println(CraftSocketConstants.PLAYER_DISCONNECTED)
     }
 
     @Deprecated("Deprecated in Java")
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         if(cause is SocketException && cause.message!!.contains("Connection reset")) {
-            println("Player connection terminated.")
+            println(CraftSocketConstants.PLAYER_TERMINATED)
         }
     }
 
@@ -53,7 +62,7 @@ class CraftServerInbound(private val configuration: CraftConnectionConfiguration
 
     private class CraftServerHandler(private val channel: Channel): ChannelInitializer<SocketChannel>() {
         override fun initChannel(channel: SocketChannel) {
-            channel.pipeline().addLast(CraftOutboundConnection(AtomicReference<Channel?>(this.channel)))
+            channel.pipeline().addLast(CraftOutboundConnection(AtomicReference<Channel?>(this.channel), true))
         }
     }
 }

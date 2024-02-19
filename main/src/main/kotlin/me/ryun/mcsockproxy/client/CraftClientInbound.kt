@@ -2,6 +2,7 @@ package me.ryun.mcsockproxy.client
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.ByteBufUtil
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
@@ -9,20 +10,28 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.handler.logging.LogLevel
+import io.netty.handler.logging.LoggingHandler
 import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 import me.ryun.mcsockproxy.common.CraftOutboundConnection
+import me.ryun.mcsockproxy.common.CraftSocketConstants
 import java.util.concurrent.atomic.AtomicReference
 
 /**
  * From client
  */
-class CraftClientInbound(private val configuration: CraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, private val websocketChannel: Channel? = null): ChannelInboundHandlerAdapter() {
+internal class CraftClientInbound(
+    private val configuration: CraftConnectionConfiguration,
+    private val clientChannel: AtomicReference<Channel?>,
+    private val websocketChannel: Channel? = null): ChannelInboundHandlerAdapter() {
     private lateinit var channel: Channel
     private var isChannelFlushable = false
+
     override fun channelActive(context: ChannelHandlerContext) {
+        println(CraftSocketConstants.CONNECTED_CLIENT)
         clientChannel.set(context.channel())
         if(websocketChannel != null) {
-            println("Connected as a WebSocket Proxy.")
+            println(CraftSocketConstants.CONNECTED_WEBSOCKET)
             channel = websocketChannel
             isChannelFlushable = true
         } else {
@@ -30,7 +39,7 @@ class CraftClientInbound(private val configuration: CraftConnectionConfiguration
             bootstrap.group(context.channel().eventLoop())
                 .channel(NioSocketChannel::class.java)
                 .handler(CraftClientHandler(context.channel()))
-            println("Connected as a Transparent Minecraft Proxy.")
+            println(CraftSocketConstants.CONNECTED_TRANSPARENT)
             val channelFuture = bootstrap.connect(configuration.host, configuration.port)
             channel = channelFuture.channel()
             channelFuture.addListener { future ->
@@ -38,7 +47,6 @@ class CraftClientInbound(private val configuration: CraftConnectionConfiguration
                 isChannelFlushable = future.isSuccess
             }
         }
-        println("Serving: localhost:" + configuration.proxyPort)
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
@@ -54,7 +62,7 @@ class CraftClientInbound(private val configuration: CraftConnectionConfiguration
     override fun channelInactive(context: ChannelHandlerContext) {
         context.disconnect()
         channel.disconnect()
-        println("Minecraft Client disconnected.")
+        println(CraftSocketConstants.DISCONNECTED_CLIENT)
         context.close()
     }
 
