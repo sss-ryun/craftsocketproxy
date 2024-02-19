@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-    implementation("io.netty:netty-all:4.1.107.Final")
+    implementation("io.netty:netty-codec-http:4.1.107.Final")
     implementation(project(":main"))
 }
 

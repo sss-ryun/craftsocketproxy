@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-    compileOnly("io.netty:netty-all:4.1.107.Final")
+    compileOnly("io.netty:netty-codec-http:4.1.107.Final")
 }
 
 tasks.test {
