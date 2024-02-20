@@ -48,7 +48,7 @@ java -jar CraftSocketProxy-1.0.0.jar --c -host localhost -port 25565 -proxy 2556
 java -jar CraftSocketProxy-1.0.0.jar --c -host example.com -port 80 -proxy 25565
 ```
 
-> [!CAUTION]
+> [!WARNING]
 > If the supplied port for the client is 80 or 443, then it will automatically attempt to connect to the host through a WebSocket connection.
 
 **Proxy Server (WebSockets)** `localhost:25565 -> ws://localhost:80`
@@ -71,6 +71,9 @@ Arguments:
 -path  <Path>     | (Optional) Path of WebSocket connection
 --version         | Query version
 ```
+
+> [!WARNING]
+> The path requires a `/` at the beginning. `-path /minecraft`
 
 ### Examples
 
