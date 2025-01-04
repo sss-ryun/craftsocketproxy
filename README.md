@@ -69,6 +69,7 @@ Arguments:
 -port  <Port>     | Port of Host
 -proxy <Port>     | Output port of Proxy
 -path  <Path>     | (Optional) Path of WebSocket connection
+--wss             | Use secure WebSocket (wss://)
 --version         | Query version
 ```
 
