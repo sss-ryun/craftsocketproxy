@@ -27,7 +27,7 @@ Tunnel Minecraft Servers to a different port or proxy a Minecraft Server through
 
 ## Get Started
 
-Start off by downloading a build from [Releases](https://github.com/sss-ryun/craftsocketproxy/releases/).
+Start off by downloading a build from [Releases](https://github.com/BedsAreDragons/craftsocketproxy/releases/).
 
 ### Prerequisites (Requirements)
 * At least Java 17+ (Download Available from https://www.openlogic.com/openjdk-downloads?field_java_parent_version_target_id=807&field_operating_system_target_id=436&field_architecture_target_id=391&field_java_package_target_id=401)
