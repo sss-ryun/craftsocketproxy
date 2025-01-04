@@ -18,7 +18,9 @@ import java.util.concurrent.atomic.AtomicReference
 
 class ProxyClient private constructor(
     private val configuration: CraftConnectionConfiguration,
-    private val path: String) {
+    private val path: String,
+    private val useSecure: Boolean = false // Add flag for wss:// support
+) {
 
     private val group = NioEventLoopGroup()
     private var restartAttempts = 0
@@ -27,19 +29,19 @@ class ProxyClient private constructor(
     private var maxRestarts = 5
 
     init {
-        if(configuration.host.isNullOrEmpty())
+        if (configuration.host.isNullOrEmpty())
             throw IllegalConfigurationException("Host is not configured.")
-        if(configuration.port == 0)
+        if (configuration.port == 0)
             throw IllegalConfigurationException("Port is not configured.")
-        if(configuration.proxyPort == 0)
+        if (configuration.proxyPort == 0)
             throw IllegalConfigurationException("Proxy Port is not configured.")
 
         start()
     }
 
     companion object {
-        fun serve(configuration: CraftConnectionConfiguration, path: String = "/"): ProxyClient {
-            return ProxyClient(configuration, path)
+        fun serve(configuration: CraftConnectionConfiguration, path: String = "/", useSecure: Boolean = false): ProxyClient {
+            return ProxyClient(configuration, path, useSecure)
         }
     }
 
@@ -50,8 +52,9 @@ class ProxyClient private constructor(
         try {
             var channel: Channel? = null
 
-            if(configuration.port == 80 || configuration.port == 443) {
-                val wsURI = URI("ws://" + configuration.host + ":" + configuration.port + path)
+            if (configuration.port == 80 || configuration.port == 443) {
+                val scheme = if (useSecure) "wss" else "ws" // Dynamic protocol selection
+                val wsURI = URI("$scheme://${configuration.host}:${configuration.port}$path")
 
                 println(CraftSocketConstants.CONNECTION_ATTEMPT + " $wsURI")
 
@@ -68,7 +71,7 @@ class ProxyClient private constructor(
                 val bootstrap = Bootstrap()
                 bootstrap.group(group)
                     .channel(NioSocketChannel::class.java)
-                    .handler(ClientInitializer(handler, outboundChannel));
+                    .handler(ClientInitializer(handler, outboundChannel))
 
                 channel = bootstrap.connect(wsURI.host, wsURI.port).sync().channel()
                 handler.getHandshakeFuture().sync()
@@ -76,23 +79,30 @@ class ProxyClient private constructor(
                 //TODO: Handle connection timeouts
 
                 channel.closeFuture().addListener {
-                    if(it.isSuccess) {
+                    if (it.isSuccess) {
                         successRestarts = 0
                     }
                     scheduleRestart()
                 }
             }
 
-            println(CraftSocketConstants.PROXYING + ": " + (if(channel != null) "ws://" else "") + configuration.host + ":" + configuration.port + " -> localhost:" + configuration.proxyPort)
+            println(
+                CraftSocketConstants.PROXYING + ": " +
+                    "${if (useSecure) "wss" else "ws"}://${configuration.host}:${configuration.port} -> localhost:${configuration.proxyPort}"
+            )
 
             ProxyCraftClient.serve(configuration, outboundChannel, channel)
-        } catch(cause: Throwable) {
-            if(cause is ConnectException && cause.message!!.contains("Connection refused")) {
-                println(CraftSocketConstants.CONNECTION_FAILED)
-            } else if(cause is BindException && cause.message!!.contains("Address already in use")) {
-                println(CraftSocketConstants.CONNECTION_BIND)
-                shutdown()
-            } else cause.printStackTrace()
+        } catch (cause: Throwable) {
+            when {
+                cause is ConnectException && cause.message!!.contains("Connection refused") -> {
+                    println(CraftSocketConstants.CONNECTION_FAILED)
+                }
+                cause is BindException && cause.message!!.contains("Address already in use") -> {
+                    println(CraftSocketConstants.CONNECTION_BIND)
+                    shutdown()
+                }
+                else -> cause.printStackTrace()
+            }
         }
     }
 
@@ -102,10 +112,10 @@ class ProxyClient private constructor(
     }
 
     private fun scheduleRestart() {
-        if(maxFailedRestarts > restartAttempts++ && maxRestarts > successRestarts++) {
+        if (maxFailedRestarts > restartAttempts++ && maxRestarts > successRestarts++) {
             restartAttempts = 0
             group.schedule({
-                if(!(group.isShutdown || group.isShuttingDown || group.isTerminated)) {
+                if (!(group.isShutdown || group.isShuttingDown || group.isTerminated)) {
                     println(CraftSocketConstants.CONNECTION_RESTART)
                     start()
                 }
