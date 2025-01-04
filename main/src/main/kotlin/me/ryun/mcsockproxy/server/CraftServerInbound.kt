@@ -27,7 +27,7 @@ internal class CraftServerInbound(
         val bootstrap = Bootstrap()
         bootstrap.group(context.channel().eventLoop())
             .channel(NioSocketChannel::class.java)
-            .handler(CraftServerHandler(context.channel()))
+            .handler(CraftServerHandler(context.channel(), configuration))
 
         val channelFuture = bootstrap.connect(configuration.host, configuration.port)
         channel = channelFuture.channel()
@@ -60,9 +60,12 @@ internal class CraftServerInbound(
         if(isChannelFlushable) channel.flush()
     }
 
-    private class CraftServerHandler(private val channel: Channel): ChannelInitializer<SocketChannel>() {
+    private class CraftServerHandler(
+        private val channel: Channel,
+        private val configuration: CraftConnectionConfiguration // Add configuration parameter
+    ): ChannelInitializer<SocketChannel>() {
         override fun initChannel(channel: SocketChannel) {
-            channel.pipeline().addLast(CraftOutboundConnection(AtomicReference<Channel?>(this.channel), true))
+            channel.pipeline().addLast(CraftOutboundConnection(AtomicReference<Channel?>(this.channel), true, configuration))
         }
     }
 }

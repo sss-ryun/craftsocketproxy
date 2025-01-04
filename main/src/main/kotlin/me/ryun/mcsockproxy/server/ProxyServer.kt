@@ -9,9 +9,12 @@ import me.ryun.mcsockproxy.common.IllegalConfigurationException
 
 class ProxyServer private constructor(configuration: CraftConnectionConfiguration, path: String) {
     init {
-        if (configuration.host.isNullOrEmpty()) throw IllegalConfigurationException("Host is not configured.")
-        if (configuration.port == 0) throw IllegalConfigurationException("Port is not configured.")
-        if (configuration.proxyPort == 0) throw IllegalConfigurationException("Proxy Port is not configured.")
+        if(configuration.host.isNullOrEmpty())
+            throw IllegalConfigurationException("Host is not configured.")
+        if(configuration.port == 0)
+            throw IllegalConfigurationException("Port is not configured.")
+        if(configuration.proxyPort == 0)
+            throw IllegalConfigurationException("Proxy Port is not configured.")
 
         val bossGroup = NioEventLoopGroup(1)
         val workerGroup = NioEventLoopGroup()
@@ -24,12 +27,9 @@ class ProxyServer private constructor(configuration: CraftConnectionConfiguratio
 
             val channel = bootstrap.bind(configuration.proxyPort).sync().channel()
 
-            println("${CraftSocketConstants.PROXYING}: ${configuration.host}:${configuration.port} -> ws://localhost:${configuration.proxyPort}$path")
+            println(CraftSocketConstants.PROXYING + ": " + configuration.host + ":" + configuration.port + " -> ws://localhost:${configuration.proxyPort}$path")
 
             channel.closeFuture().sync()
-        } catch (cause: Throwable) {
-            println("Server error: ${cause.message}")
-            cause.printStackTrace()
         } finally {
             workerGroup.shutdownGracefully()
             bossGroup.shutdownGracefully()

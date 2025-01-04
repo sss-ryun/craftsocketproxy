@@ -10,41 +10,51 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException
 import me.ryun.mcsockproxy.common.CraftSocketConstants
 import java.net.SocketException
+import java.util.Queue
+import java.util.concurrent.ConcurrentLinkedQueue
 
 internal class ClientInboundConnectionHandler(
-    private val handshaker: WebSocketClientHandshaker): SimpleChannelInboundHandler<Any>() {
+    private val handshaker: WebSocketClientHandshaker,
+    private val onReconnect: () -> Unit // Add reconnect function as a parameter
+) : SimpleChannelInboundHandler<Any>() {
     private lateinit var handshakeFuture: ChannelPromise
+    private val packetQueue: Queue<Any> = ConcurrentLinkedQueue()
 
     override fun channelRead0(context: ChannelHandlerContext, any: Any) {
         val channel = context.channel()
-        if(!handshaker.isHandshakeComplete) {
+        if (!handshaker.isHandshakeComplete) {
             try {
                 handshaker.finishHandshake(channel, any as FullHttpResponse)
 
                 handshakeFuture.setSuccess()
-
                 println(CraftSocketConstants.HANDSHAKE_COMPLETE)
             } catch (exception: WebSocketHandshakeException) {
                 handshakeFuture.setFailure(exception)
-
                 println(CraftSocketConstants.HANDSHAKE_FAILED)
+                onReconnect()
             }
-
             return
         }
 
-        when(any) {
+        when (any) {
             is FullHttpResponse -> {
                 println(CraftSocketConstants.UNSUPPORTED_HTTP_RESPONSE)
                 context.close()
             }
-            is BinaryWebSocketFrame -> context.fireChannelRead(any.retain())
+            is BinaryWebSocketFrame -> {
+                packetQueue.offer(any.retain())
+                context.fireChannelRead(any.retain())
+            }
         }
     }
-    @Deprecated("Deprecated in Java")
+
     override fun exceptionCaught(context: ChannelHandlerContext, cause: Throwable) {
-        if(cause is SocketException && cause.message!!.contains("Connection reset")) {
+        if (cause is SocketException && cause.message!!.contains("Connection reset")) {
             println(CraftSocketConstants.CONNECTION_TERMINATED)
+            onReconnect()
+        } else {
+            println("Unhandled exception: ${cause.message}")
+            cause.printStackTrace()
         }
     }
 
@@ -64,5 +74,14 @@ internal class ClientInboundConnectionHandler(
         context.disconnect()
         context.fireChannelInactive()
         println(CraftSocketConstants.DISCONNECTED_WEBSOCKET)
+        onReconnect()
+    }
+
+    private fun forwardBufferedPackets(context: ChannelHandlerContext) {
+        val channel = context.channel()
+        while (!packetQueue.isEmpty()) {
+            val packet = packetQueue.poll()
+            channel.writeAndFlush(packet)
+        }
     }
 }

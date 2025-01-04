@@ -7,7 +7,7 @@ import me.ryun.mcsockproxy.server.ProxyServer
 val Boolean.int
     get() = this.compareTo(false)
 
-const val VERSION = "1.1.0"
+const val VERSION = "1.1.3"
 
 fun main(args: Array<String>) {
     val queryVersion = args.contains("--version")
@@ -32,6 +32,7 @@ fun main(args: Array<String>) {
                 Craft Socket Proxy
                 Version: $VERSION
                 Author: SSS Ryun (sss-ryun)
+                Contributor: BedsDrout (bedsaredragons)
             """.trimIndent()
         )
         printHelp()
