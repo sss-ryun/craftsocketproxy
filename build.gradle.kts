@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.jvm.JvmTargetValidationMode
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.1.0"
 }
 
 kotlin {
@@ -10,7 +10,7 @@ kotlin {
 }
 
 group = "me.ryun.mcsockproxy"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()

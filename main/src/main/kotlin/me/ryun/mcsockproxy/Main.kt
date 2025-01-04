@@ -4,11 +4,28 @@ import me.ryun.mcsockproxy.client.ProxyClient
 import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 import me.ryun.mcsockproxy.server.ProxyServer
 
+/**
+ * Add your name here if you're contributing.
+ */
+val authorList = listOf<String>("SSS Ryun (sss-ryun)")
+
+/**
+ * Returns 1 for True and 0 for False.
+ */
 val Boolean.int
     get() = this.compareTo(false)
 
-const val VERSION = "1.0.0"
+//Constant values
+const val VERSION = "1.0.1"
+const val INVALID_HOSTNAME = "Missing or invalid hostname."
+const val INVALID_PORT = "Missing or invalid port."
+const val INVALID_PROXY_PORT = "Missing or invalid proxy port."
+const val STARTING_SERVER = "Starting proxy server..."
+const val STARTING_CLIENT = "Starting proxy client..."
 
+/**
+ * The main code. This is where the code is executed for the standalone version
+ */
 fun main(args: Array<String>) {
     val queryVersion = args.contains("--version")
 
@@ -32,7 +49,7 @@ fun main(args: Array<String>) {
             """
                 Craft Socket Proxy
                 Version: $VERSION
-                Author: SSS Ryun (sss-ryun)
+                Authors: ${authorList.joinToString(", ")}
                 
             """.trimIndent()
         )
@@ -41,13 +58,13 @@ fun main(args: Array<String>) {
         return
     }
 
-    if(!requireString(args, "-host", "Missing or invalid hostname."))
+    if(!requireString(args, "-host", INVALID_HOSTNAME))
         return
 
-    if(!requireInt(args, "-port", "Missing or invalid port."))
+    if(!requireInt(args, "-port", INVALID_PORT))
         return
 
-    if(!requireInt(args, "-proxy", "Missing or invalid proxy port."))
+    if(!requireInt(args, "-proxy", INVALID_PROXY_PORT))
         return
 
     val hasPath = hasValidString(args, "-path")
@@ -58,16 +75,19 @@ fun main(args: Array<String>) {
     val path = if(hasPath) getString(args, "-path") else "/"
 
     if(doServer) {
-        println("Starting proxy server...")
+        println(STARTING_SERVER)
         val config = CraftConnectionConfiguration(proxyPort, hostname, port)
         ProxyServer.serve(config, path)
     } else {
-        println("Starting proxy client...")
+        println(STARTING_CLIENT)
         val config = CraftConnectionConfiguration(proxyPort, hostname, port)
         ProxyClient.serve(config, path)
     }
 }
 
+/**
+ * Prints a default help output.
+ */
 fun printHelp() {
     println(
         """
@@ -83,6 +103,9 @@ fun printHelp() {
     )
 }
 
+/**
+ * Validates if the required Int value is valid and available for use.
+ */
 fun requireInt(args: Array<String>, arg: String, message: String): Boolean {
     val hasArg = args.contains(arg)
     val argIndex = args.indexOf(arg) + 1
@@ -97,10 +120,16 @@ fun requireInt(args: Array<String>, arg: String, message: String): Boolean {
     return true
 }
 
+/**
+ * Returns the Int after the `arg` value.
+ */
 fun getInt(args: Array<String>, arg: String): Int {
     return args[args.indexOf(arg) + 1].toInt()
 }
 
+/**
+ * Validates if the required String value is valid and available for use.
+ */
 fun requireString(args: Array<String>, arg: String, message: String): Boolean {
     if(!hasValidString(args, arg)) {
         println(message)
@@ -111,6 +140,9 @@ fun requireString(args: Array<String>, arg: String, message: String): Boolean {
     return true
 }
 
+/**
+ * Checks if the String value after the `arg` value is valid.
+ */
 fun hasValidString(args: Array<String>, arg: String): Boolean {
     val hasArg = args.contains(arg)
     if(!hasArg)
@@ -121,6 +153,9 @@ fun hasValidString(args: Array<String>, arg: String): Boolean {
     return isValidString
 }
 
+/**
+ * Returns the String after the `arg` value.
+ */
 fun getString(args: Array<String>, arg: String): String {
     return args[args.indexOf(arg) + 1]
 }

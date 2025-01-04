@@ -16,6 +16,9 @@ import java.net.URI
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * A class for proxying a WebSocket game frame back to its original game frame.
+ */
 class ProxyClient private constructor(
     private val configuration: CraftConnectionConfiguration,
     private val path: String) {
@@ -24,7 +27,7 @@ class ProxyClient private constructor(
     private var restartAttempts = 0
     private var successRestarts = 0
     private var maxFailedRestarts = 5
-    private var maxRestarts = 5
+    private var maxRestarts = 5 //How many restarts to do if suddenly disconnected.
 
     init {
         if(configuration.host.isNullOrEmpty())
@@ -38,11 +41,17 @@ class ProxyClient private constructor(
     }
 
     companion object {
+        /**
+         * Returns a WebSocket game frame from a proxy server back to its original game frame.
+         */
         fun serve(configuration: CraftConnectionConfiguration, path: String = "/"): ProxyClient {
             return ProxyClient(configuration, path)
         }
     }
 
+    /**
+     * Starts the ProxyClient.
+     */
     private fun start() {
         //TODO: Give client a unique ID
         val outboundChannel = AtomicReference<Channel?>(null)
@@ -96,11 +105,17 @@ class ProxyClient private constructor(
         }
     }
 
+    /**
+     * Gracefully shutdown the ProxyClient.
+     */
     fun shutdown() {
         group.shutdownGracefully()
         println(CraftSocketConstants.SHUTTING_DOWN)
     }
 
+    /**
+     * Schedules a quick restart for a sudden disconnection.
+     */
     private fun scheduleRestart() {
         if(maxFailedRestarts > restartAttempts++ && maxRestarts > successRestarts++) {
             restartAttempts = 0

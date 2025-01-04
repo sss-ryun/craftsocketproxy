@@ -7,9 +7,11 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
-import me.ryun.mcsockproxy.common.CraftSocketConstants
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * A class for proxying a game frame to a different port.
+ */
 internal class ProxyCraftClient private constructor(
     configuration: CraftConnectionConfiguration,
     clientChannel: AtomicReference<Channel?>,
@@ -37,12 +39,21 @@ internal class ProxyCraftClient private constructor(
     }
 
     companion object {
+        /**
+         * Proxy game server to a different port and localhost.
+         */
         fun serve(configuration: CraftConnectionConfiguration, clientChannel: AtomicReference<Channel?>, websocketChannel: Channel? = null): ProxyCraftClient {
             return ProxyCraftClient(configuration, clientChannel, websocketChannel)
         }
     }
 
+    /**
+     * Initializes with the connection configuration.
+     */
     private class CraftClientInitializer(private val configuration: CraftConnectionConfiguration, private val clientChannel: AtomicReference<Channel?>, private val websocketChannel: Channel? = null): ChannelInitializer<SocketChannel>() {
+        /**
+         * Called when the Channel is initialized for the first time.
+         */
         override fun initChannel(channel: SocketChannel) {
             channel.pipeline().addLast(CraftClientInbound(configuration, clientChannel, websocketChannel))
         }

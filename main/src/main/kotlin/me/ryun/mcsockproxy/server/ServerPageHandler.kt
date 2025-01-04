@@ -6,6 +6,9 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.codec.http.*
 
+/**
+ * A Handler for all HTTP requests to the server. Responds Forbidden to all non-WebSocket requests.
+ */
 internal class ServerPageHandler(private val path: String = "/"): SimpleChannelInboundHandler<FullHttpRequest>() {
 
     override fun channelRead0(context: ChannelHandlerContext, request: FullHttpRequest) {
@@ -23,12 +26,7 @@ internal class ServerPageHandler(private val path: String = "/"): SimpleChannelI
             context.fireChannelRead(request.retain())
 
             return
-        }/*
-
-        if(request.uri().startsWith(path)) {
-            //sendHttpResponse(context, request, DefaultFullHttpResponse(request.protocolVersion(), HttpResponseStatus.NOT_FOUND, context.alloc().buffer(0)))
-            return
-        }*/
+        }
 
         //Respond with Forbidden to all requests outside the specified WebSocket path.
         sendHttpResponse(
@@ -38,6 +36,9 @@ internal class ServerPageHandler(private val path: String = "/"): SimpleChannelI
         )
     }
 
+    /**
+     * Helper method to send a HttpResponse.
+     */
     private fun sendHttpResponse(context: ChannelHandlerContext, request: FullHttpRequest, response: FullHttpResponse) {
         val status = response.status()
 
@@ -53,6 +54,9 @@ internal class ServerPageHandler(private val path: String = "/"): SimpleChannelI
             future.addListener(ChannelFutureListener.CLOSE)
     }
 
+    /**
+     * Closes the connection if an exception occurs.
+     */
     @Deprecated("Deprecated in Java")
     override fun exceptionCaught(context: ChannelHandlerContext, cause: Throwable) {
         cause.printStackTrace()

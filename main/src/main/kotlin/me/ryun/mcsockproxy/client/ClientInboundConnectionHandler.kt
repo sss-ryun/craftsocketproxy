@@ -11,10 +11,16 @@ import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException
 import me.ryun.mcsockproxy.common.CraftSocketConstants
 import java.net.SocketException
 
+/**
+ * Receives a WebSocket connection from a WebSocket server and passes the content to CraftOutboundConnection.
+ */
 internal class ClientInboundConnectionHandler(
     private val handshaker: WebSocketClientHandshaker): SimpleChannelInboundHandler<Any>() {
     private lateinit var handshakeFuture: ChannelPromise
 
+    /**
+     * Called when content is received.
+     */
     override fun channelRead0(context: ChannelHandlerContext, any: Any) {
         val channel = context.channel()
         if(!handshaker.isHandshakeComplete) {
@@ -41,6 +47,10 @@ internal class ClientInboundConnectionHandler(
             is BinaryWebSocketFrame -> context.fireChannelRead(any.retain())
         }
     }
+
+    /**
+     * Throws an exception if there is an exception.
+     */
     @Deprecated("Deprecated in Java")
     override fun exceptionCaught(context: ChannelHandlerContext, cause: Throwable) {
         if(cause is SocketException && cause.message!!.contains("Connection reset")) {
@@ -48,18 +58,30 @@ internal class ClientInboundConnectionHandler(
         }
     }
 
+    /**
+     * Returns the HandshakeFuture without guaranteeing if its initialized or valid.
+     */
     fun getHandshakeFuture(): ChannelFuture {
         return handshakeFuture
     }
 
+    /**
+     * Called each time a Handler is added.
+     */
     override fun handlerAdded(context: ChannelHandlerContext) {
         handshakeFuture = context.newPromise()
     }
 
+    /**
+     * Called once the Channel has an active connection.
+     */
     override fun channelActive(context: ChannelHandlerContext) {
         handshaker.handshake(context.channel())
     }
 
+    /**
+     * Called when the Channel disconnects.
+     */
     override fun channelInactive(context: ChannelHandlerContext) {
         context.disconnect()
         context.fireChannelInactive()

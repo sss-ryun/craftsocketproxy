@@ -8,10 +8,16 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler
 import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 
+/**
+ * Initializes default values for the server.
+ */
 internal class ServerInitializer(
     private val configuration: CraftConnectionConfiguration,
     private val path: String = "/"): ChannelInitializer<SocketChannel>() {
 
+    /**
+     * Called when the Channel is initialized for the first time.
+     */
     override fun initChannel(channel: SocketChannel) {
         val pipeline = channel.pipeline()
         pipeline.addLast(HttpServerCodec())

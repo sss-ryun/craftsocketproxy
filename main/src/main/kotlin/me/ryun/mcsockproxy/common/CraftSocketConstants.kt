@@ -1,5 +1,8 @@
 package me.ryun.mcsockproxy.common
 
+/**
+ * Contains the constants used in the String outputs.
+ */
 internal class CraftSocketConstants private constructor() {
     companion object {
         const val CONNECTED_CLIENT = "Minecraft Client connected."

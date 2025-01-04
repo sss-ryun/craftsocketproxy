@@ -7,6 +7,9 @@ import me.ryun.mcsockproxy.common.CraftConnectionConfiguration
 import me.ryun.mcsockproxy.common.CraftSocketConstants
 import me.ryun.mcsockproxy.common.IllegalConfigurationException
 
+/**
+ * Proxies a game frame to a WebSocket frame.
+ */
 class ProxyServer private constructor(configuration: CraftConnectionConfiguration, path: String) {
     init {
         if(configuration.host.isNullOrEmpty())
@@ -31,12 +34,16 @@ class ProxyServer private constructor(configuration: CraftConnectionConfiguratio
 
             channel.closeFuture().sync()
         } finally {
+            //This executes after the Channel CloseFuture is called.
             workerGroup.shutdownGracefully()
             bossGroup.shutdownGracefully()
         }
     }
 
     companion object {
+        /**
+         * Proxy game through WebSocket.
+         */
         fun serve(configuration: CraftConnectionConfiguration, path: String = "/"): ProxyServer {
             return ProxyServer(configuration, path)
         }

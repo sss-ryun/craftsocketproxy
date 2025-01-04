@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "me.ryun.mcsockproxy"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -17,6 +17,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
 kotlin {
     jvmToolchain(8)
 }
