@@ -37,7 +37,7 @@ Start off by downloading a build from [Releases](https://github.com/sss-ryun/cra
 
 **Proxy Client (no WebSockets)** `localhost:25565 -> localhost:25566`
 ```bash
-java -jar CraftSocketProxy-1.0.0.jar --c -host localhost -port 25565 -proxy 25566
+java -jar CraftSocketProxy-1.0.1.jar --c -host localhost -port 25565 -proxy 25566
 ```
 > [!NOTE]
 > This one is useful if you can't change the port forwarding settings in your router, and you can't change the server port.
@@ -45,7 +45,7 @@ java -jar CraftSocketProxy-1.0.0.jar --c -host localhost -port 25565 -proxy 2556
 
 **Proxy Client (with WebSockets)** `ws://example.com:80 -> localhost:25565`
 ```bash
-java -jar CraftSocketProxy-1.0.0.jar --c -host example.com -port 80 -proxy 25565
+java -jar CraftSocketProxy-1.0.1.jar --c -host example.com -port 80 -proxy 25565
 ```
 
 > [!WARNING]
@@ -53,7 +53,7 @@ java -jar CraftSocketProxy-1.0.0.jar --c -host example.com -port 80 -proxy 25565
 
 **Proxy Server (WebSockets)** `localhost:25565 -> ws://localhost:80`
 ```bash
-java -jar CraftSocketProxy-1.0.0.jar --s -host localhost -port 25565 -proxy 80
+java -jar CraftSocketProxy-1.0.1.jar --s -host localhost -port 25565 -proxy 80
 ```
 
 > [!IMPORTANT]
